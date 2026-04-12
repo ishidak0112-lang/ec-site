@@ -41,6 +41,21 @@ STRIPE_SECRET_KEY=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 ```
 
+## ドキュメント同期ルール（必須）
+
+実装変更時は、影響するドキュメントを**同じコミットで必ず更新**する。
+
+| 変更内容 | 更新が必要なドキュメント |
+|---------|----------------------|
+| ページ追加・削除・パス変更 | `docs/screen-flow.md` |
+| 機能の追加・変更・削除・ステータス更新 | `docs/feature-list.md` |
+| テーブル・カラム・Enum の変更 | `docs/db-design.md` + `prisma/schema.prisma` |
+| APIエンドポイントの追加・変更・削除 | `docs/api-design.md` |
+| 画面レイアウトの大幅変更 | `docs/wireframe.md` |
+
+- ドキュメントの `最終更新:` 日付も合わせて更新すること
+- 実装だけ変えてドキュメントを放置しない
+
 ## Git運用
 - 作業前: git pull
 - 作業後: git add . && git commit -m "{変更内容}" && git push
