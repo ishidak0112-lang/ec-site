@@ -52,6 +52,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 | テーブル・カラム・Enum の変更 | `docs/db-design.md` + `prisma/schema.prisma` |
 | APIエンドポイントの追加・変更・削除 | `docs/api-design.md` |
 | 画面レイアウトの大幅変更 | `docs/wireframe.md` |
+| 作業履歴・マイルストーンの記録 | `docs/work-log.md` |
 
 - ドキュメントの `最終更新:` 日付も合わせて更新すること
 - 実装だけ変えてドキュメントを放置しない
