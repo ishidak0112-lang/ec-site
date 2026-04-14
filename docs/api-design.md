@@ -1,6 +1,6 @@
 # API設計書
 
-最終更新: 2026-04-13
+最終更新: 2026-04-14
 
 ## 概要
 
@@ -45,10 +45,10 @@ Next.js App Router の Route Handlers（`src/app/api/`）で実装。
 
 | メソッド | パス | 説明 | 認証 |
 |---------|------|------|------|
-| GET | /api/admin/products | 全商品一覧（非公開含む） | ADMIN |
-| POST | /api/admin/products | 商品登録 | ADMIN |
-| PUT | /api/admin/products/[id] | 商品更新 | ADMIN |
-| DELETE | /api/admin/products/[id] | 商品削除 | ADMIN |
+| GET | /api/admin/products | 全商品一覧（非公開含む） ✅ 実装済み | ADMIN |
+| POST | /api/admin/products | 商品登録 ✅ 実装済み | ADMIN |
+| PUT | /api/admin/products/[id] | 商品更新 ✅ 実装済み | ADMIN |
+| DELETE | /api/admin/products/[id] | 商品削除 ✅ 実装済み | ADMIN |
 | GET | /api/admin/orders | 全注文一覧 | ADMIN |
 | PUT | /api/admin/orders/[id] | 注文ステータス更新 | ADMIN |
 | GET | /api/admin/users | ユーザー一覧 | ADMIN |
