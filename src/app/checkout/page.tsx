@@ -57,7 +57,8 @@ export default function CheckoutPage() {
         });
 
         if (!res.ok) {
-          const data = await res.json();
+          const text = await res.text();
+          const data = text ? JSON.parse(text) : {};
           throw new Error(data.error ?? '決済セッションの作成に失敗しました');
         }
 

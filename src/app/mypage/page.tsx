@@ -8,21 +8,48 @@ import { statusLabel, statusColor } from '@/data/mockData'
 import type { OrderDetail } from '@/types'
 
 export default function MyPage() {
-  const { data: session, status } = useSession()
+  const { data: session, status, update } = useSession()
   const router = useRouter()
   const [tab, setTab] = useState<'orders' | 'profile'>('orders')
   const [orders, setOrders] = useState<OrderDetail[]>([])
   const [ordersLoading, setOrdersLoading] = useState(false)
+  const [name, setName] = useState('')
+  const [profileSaving, setProfileSaving] = useState(false)
+  const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     if (status !== 'authenticated') return
+    setName(session?.user?.name ?? '')
     setOrdersLoading(true)
     fetch('/api/orders')
       .then((res) => res.json())
       .then((data) => setOrders(Array.isArray(data) ? data : []))
       .catch(() => setOrders([]))
       .finally(() => setOrdersLoading(false))
-  }, [status])
+  }, [status, session?.user?.name])
+
+  const handleProfileSave = async () => {
+    setProfileSaving(true)
+    setProfileMessage(null)
+    try {
+      const res = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+      if (res.ok) {
+        await update()
+        setProfileMessage({ type: 'success', text: '保存しました' })
+      } else {
+        const data = await res.json()
+        setProfileMessage({ type: 'error', text: data.error ?? '保存に失敗しました' })
+      }
+    } catch {
+      setProfileMessage({ type: 'error', text: '保存に失敗しました' })
+    } finally {
+      setProfileSaving(false)
+    }
+  }
 
   if (status === 'loading') {
     return <div className="min-h-screen flex items-center justify-center">読み込み中...</div>
@@ -104,15 +131,30 @@ export default function MyPage() {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-sm mb-2">お名前</label>
-                    <input type="text" defaultValue={session.user?.name ?? ''}
-                      className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm mb-2">メールアドレス</label>
                     <input type="email" defaultValue={session.user?.email ?? ''} readOnly
                       className="w-full px-4 py-2 border border-gray-200 bg-gray-50 text-gray-500" />
                   </div>
-                  <button className="bg-black text-white px-8 py-3 hover:bg-gray-800 transition-colors">保存する</button>
+                  {profileMessage && (
+                    <p className={`text-sm ${profileMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                      {profileMessage.text}
+                    </p>
+                  )}
+                  <button
+                    onClick={handleProfileSave}
+                    disabled={profileSaving}
+                    className="bg-black text-white px-8 py-3 hover:bg-gray-800 transition-colors disabled:opacity-50"
+                  >
+                    {profileSaving ? '保存中...' : '保存する'}
+                  </button>
                 </div>
               </div>
             </div>

@@ -20,6 +20,12 @@ Next.js App Router の Route Handlers（`src/app/api/`）で実装。
 | POST | /api/auth/signup | 新規会員登録 ✅ 実装済み | 不要 |
 | POST | /api/auth/[...nextauth] | NextAuth.js ハンドラ ✅ 実装済み | - |
 
+### ユーザー（マイページ）
+
+| メソッド | パス | 説明 | 認証 |
+|---------|------|------|------|
+| PUT | /api/user/profile | プロフィール更新（名前） ✅ 実装済み | 必要 |
+
 ### 商品
 
 | メソッド | パス | 説明 | 認証 |
@@ -52,7 +58,7 @@ Next.js App Router の Route Handlers（`src/app/api/`）で実装。
 | DELETE | /api/admin/products/[id] | 商品削除 ✅ 実装済み | ADMIN |
 | GET | /api/admin/orders | 全注文一覧 | ADMIN |
 | PUT | /api/admin/orders/[id] | 注文ステータス更新 | ADMIN |
-| GET | /api/admin/users | ユーザー一覧 | ADMIN |
+| GET | /api/admin/users | ユーザー一覧 ✅ 実装済み | ADMIN |
 
 ## リクエスト/レスポンス例
 
