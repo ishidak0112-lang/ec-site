@@ -11,7 +11,17 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing session_id' }, { status: 400 })
   }
 
-  const session = await stripe.checkout.sessions.retrieve(sessionId)
+  let session: Awaited<ReturnType<typeof stripe.checkout.sessions.retrieve>>
+  try {
+    session = await stripe.checkout.sessions.retrieve(sessionId)
+  } catch (e) {
+    console.error('[checkout/verify] Stripe retrieve failed', e)
+    return NextResponse.json(
+      { error: 'セッションの取得に失敗しました。URL を確認するか、しばらくしてから注文履歴を確認してください。' },
+      { status: 502 }
+    )
+  }
+
   let orderId = session.id
 
   // Webhook未達（ローカル開発など）でも、決済済みセッションはここで注文を確定させる
@@ -33,6 +43,13 @@ export async function GET(req: NextRequest) {
         if (existing) orderId = existing.id
       } else {
         console.error('[checkout/verify] failed to reconcile paid session', err)
+        const message =
+          err instanceof Error && err.message === 'INSUFFICIENT_STOCK'
+            ? '在庫不足のため注文を確定できませんでした。サポートまでお問い合わせください。'
+            : err instanceof Error && err.message === 'MISSING_METADATA'
+              ? '注文メタデータが欠落しています。サポートまでお問い合わせください。'
+              : '注文の確定処理に失敗しました。マイページの注文履歴を確認するか、時間をおいて再度お試しください。'
+        return NextResponse.json({ error: message }, { status: 500 })
       }
     }
   }

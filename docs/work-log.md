@@ -17,7 +17,13 @@
 - 調査で、決済後に `/api/webhooks/stripe` の受信ログが出ず、売上（orders）が未作成のケースを確認。
 - `src/lib/checkoutOrder.ts` に「Checkout Session から注文作成」の共通処理を切り出し、Webhookと`/api/checkout/verify`の両方から利用するよう変更。
 - `GET /api/checkout/verify` で `payment_status=paid` かつ未作成時に注文作成を試行するフォールバックを追加（冪等）。
+- 注文確定に失敗した場合は **500** で理由を返す（従来はログのみで 200 になり得た）。完了画面は `error` を表示。
+- Stripe セッション取得失敗は **502**。`/order-complete` で API 失敗時に案内文を表示。
 - `CheckoutPage` の `router.push('/cart')` を render 中実行から `useEffect` へ移し、購入直後の runtime warning を解消。
+
+### 商品画像（Unsplash 404）
+- ターミナルに `upstream image response failed ... 404` が出ていた原因は、シードの「ワイヤレス充電器」が参照していた Unsplash 写真が削除済みだったこと。
+- `prisma/seed.ts` の `imageUrl` を HTTP 200 になる別写真に差し替え。既存 DB は `npx prisma db seed`（または該当商品の `imageUrl` 更新）で反映。
 
 ### 返品申請フロー（ユーザー→管理）
 - `POST /api/orders/[id]/return` を追加。ユーザー本人のみ返品申請でき、`returnStatus` を `REQUESTED` に更新。
@@ -75,4 +81,4 @@
 
 ---
 
-最終更新: 2026-04-15（障害対応ログを追記）
+最終更新: 2026-04-15（verify エラー応答・シード画像URL・完了画面）

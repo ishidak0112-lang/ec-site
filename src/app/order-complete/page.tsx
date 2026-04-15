@@ -15,21 +15,39 @@ function OrderDetails() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
   const [orderInfo, setOrderInfo] = useState<OrderInfo | null>(null);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
   const [loading, setLoading] = useState(!!sessionId);
 
   useEffect(() => {
     if (!sessionId) return;
     fetch(`/api/checkout/verify?session_id=${sessionId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setOrderInfo(data);
-        setLoading(false);
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok && data?.error) {
+          setVerifyError(typeof data.error === 'string' ? data.error : '注文情報の取得に失敗しました。');
+          return;
+        }
+        if (data?.orderId != null) {
+          setOrderInfo(data as OrderInfo);
+        }
       })
-      .catch(() => setLoading(false));
+      .catch(() => setVerifyError('注文情報の取得に失敗しました。ネットワークをご確認ください。'))
+      .finally(() => setLoading(false));
   }, [sessionId]);
 
   if (loading) {
     return <p className="text-gray-600 mb-12">注文情報を確認中...</p>;
+  }
+
+  if (verifyError) {
+    return (
+      <div className="mb-12 space-y-3 text-left max-w-lg mx-auto">
+        <p className="text-gray-800">{verifyError}</p>
+        <p className="text-gray-600 text-sm">
+          Stripe ではお支払いが完了している場合でも、反映まで数分かかることがあります。マイページの注文履歴をご確認ください。
+        </p>
+      </div>
+    );
   }
 
   if (orderInfo) {

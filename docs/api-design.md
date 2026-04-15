@@ -1,6 +1,6 @@
 # API設計書
 
-最終更新: 2026-04-15（Webhook未達時の注文確定フォールバック）
+最終更新: 2026-04-15（`/api/checkout/verify` のエラー応答・シード画像URL差し替え）
 
 ## 概要
 
@@ -56,6 +56,7 @@ Next.js App Router の Route Handlers（`src/app/api/`）で実装。
 - 同一 `session.id` の再送・競合時は UNIQUE 制約（`P2002`）を握りつぶして 200 を返す（冪等）。
 - 減算できない場合は 500（決済済みだが在庫不足 — 運用で返金等が必要になり得る）。
 - ローカル開発等で Webhook が到達しない場合でも、`GET /api/checkout/verify` で同じ注文作成ロジックを呼び出し、売上未反映を回避する（冪等）。
+- `GET /api/checkout/verify` のエラー例: Stripe のセッション取得失敗は **502**（`error` メッセージあり）。決済済みだが注文確定に失敗（在庫不足・メタデータ欠落など）は **500**。成功時は `orderId`（DB の注文ID）、`totalAmount`、`shippingName`。
 
 ### 管理者 API
 

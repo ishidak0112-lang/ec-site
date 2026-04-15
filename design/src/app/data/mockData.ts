@@ -99,7 +99,7 @@ export const mockProducts: Product[] = [
     price: 5600,
     stock: 95,
     category: 'PC周辺機器',
-    image: 'https://images.unsplash.com/photo-1591290619762-9b2c0815cd61?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=800&q=80',
   },
 ];
 
