@@ -14,6 +14,7 @@ export function Header() {
   const isAdmin =
     !!session?.user &&
     (session.user as { role?: string }).role === 'ADMIN'
+  const logoutCallbackUrl = '/login'
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
@@ -29,34 +30,21 @@ export function Header() {
             )}
             {session ? (
               isAdmin ? (
-                <>
-                  <Link href="/admin" className="hover:opacity-60 transition-opacity font-medium">
-                    管理ダッシュボード
-                  </Link>
-                  <button
-                    onClick={() => signOut({ callbackUrl: '/login' })}
-                    className="hover:opacity-60 transition-opacity text-gray-600"
-                  >
-                    ログアウト
-                  </button>
-                </>
+                <Link href="/admin" className="hover:opacity-60 transition-opacity font-medium">
+                  管理ダッシュボード
+                </Link>
               ) : (
-                <>
-                  <Link href="/mypage" className="hover:opacity-60 transition-opacity">マイページ</Link>
-                  <button
-                    onClick={() => signOut({ callbackUrl: '/' })}
-                    className="hover:opacity-60 transition-opacity text-gray-600"
-                  >
-                    ログアウト
-                  </button>
-                </>
+                <Link href="/mypage" className="hover:opacity-60 transition-opacity">マイページ</Link>
               )
-            ) : (
-              <Link href="/login" className="hover:opacity-60 transition-opacity">ログイン</Link>
-            )}
+            ) : null}
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-sm">
+            {!session && !isAdmin && (
+              <Link href="/login" className="hidden md:block hover:opacity-60 transition-opacity text-gray-700">
+                ログイン
+              </Link>
+            )}
             {session && !isAdmin && (
               <Link href="/mypage">
                 <User className="w-5 h-5 text-gray-600" />
@@ -72,6 +60,16 @@ export function Header() {
                 )}
               </Link>
             )}
+            <div className="hidden md:block">
+              {session && isAdmin ? (
+                <button
+                  onClick={() => signOut({ callbackUrl: logoutCallbackUrl })}
+                  className="hover:opacity-60 transition-opacity text-gray-600"
+                >
+                  ログアウト
+                </button>
+              ) : null}
+            </div>
             <button className="md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -88,7 +86,7 @@ export function Header() {
                 <>
                   <Link href="/admin" className="block py-2 font-medium" onClick={() => setMenuOpen(false)}>管理ダッシュボード</Link>
                   <button
-                    onClick={() => { setMenuOpen(false); signOut({ callbackUrl: '/login' }) }}
+                    onClick={() => { setMenuOpen(false); signOut({ callbackUrl: logoutCallbackUrl }) }}
                     className="block py-2 text-left w-full text-gray-600"
                   >
                     ログアウト
@@ -97,12 +95,6 @@ export function Header() {
               ) : (
                 <>
                   <Link href="/mypage" className="block py-2" onClick={() => setMenuOpen(false)}>マイページ</Link>
-                  <button
-                    onClick={() => { setMenuOpen(false); signOut({ callbackUrl: '/' }) }}
-                    className="block py-2 text-left w-full text-gray-600"
-                  >
-                    ログアウト
-                  </button>
                 </>
               )
             ) : (

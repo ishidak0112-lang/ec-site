@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/lib/cartStore';
@@ -19,8 +19,13 @@ export default function CheckoutPage() {
   const subtotal = total();
   const shipping = subtotal >= 5000 ? 0 : 500;
 
+  useEffect(() => {
+    if (items.length === 0) {
+      router.push('/cart');
+    }
+  }, [items.length, router]);
+
   if (items.length === 0) {
-    if (typeof window !== 'undefined') router.push('/cart');
     return null;
   }
 
@@ -80,9 +85,9 @@ export default function CheckoutPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-4xl tracking-tight mb-12">購入手続き</h1>
+      <h1 className="text-3xl sm:text-4xl tracking-tight mb-8 sm:mb-12">購入手続き</h1>
       <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           <div className="lg:col-span-2 space-y-8">
             <section className="bg-white border border-gray-200 p-6">
               <h2 className="text-xl mb-6">お客様情報</h2>
@@ -146,7 +151,7 @@ export default function CheckoutPage() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="bg-gray-50 p-6 sticky top-24">
+            <div className="bg-gray-50 p-4 sm:p-6 lg:sticky lg:top-24">
               <h2 className="text-xl mb-6">ご注文内容</h2>
               <div className="space-y-4 mb-6 pb-6 border-b border-gray-200">
                 {items.map(item => (

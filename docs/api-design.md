@@ -1,6 +1,6 @@
 # API設計書
 
-最終更新: 2026-04-15（管理注文 PUT に開封・会計・返品フィールド）
+最終更新: 2026-04-15（Webhook未達時の注文確定フォールバック）
 
 ## 概要
 
@@ -40,13 +40,14 @@ Next.js App Router の Route Handlers（`src/app/api/`）で実装。
 |---------|------|------|------|
 | GET | /api/orders | 自分の注文一覧 ✅ 実装済み | 必要（ADMIN は 403） |
 | GET | /api/orders/[id] | 注文詳細 | 必要（本人のみ） |
+| POST | /api/orders/[id]/return | 返品申請（`returnStatus` を `REQUESTED` に更新）✅ 実装済み | 必要（本人のみ / ADMIN は 403） |
 
 ### 決済（Stripe）
 
 | メソッド | パス | 説明 | 認証 |
 |---------|------|------|------|
 | POST | /api/checkout/session | Stripe Checkout Session作成（**DB で在庫確認**、不足時 400）✅ | 必要（ADMIN は 403） |
-| GET  | /api/checkout/verify | Stripe Session情報取得 ✅ 実装済み | 不要 |
+| GET  | /api/checkout/verify | Stripe Session情報取得 ✅ 実装済み（`payment_status=paid` かつ注文未作成なら、Webhook未達時のフォールバックとして注文作成を試行） | 不要 |
 | POST | /api/webhooks/stripe | `checkout.session.completed`：**同一トランザクションで在庫減算＋注文作成**、`stripeCheckoutSessionId` で冪等 ✅ | Stripe署名検証 |
 
 **Webhook 挙動（`POST /api/webhooks/stripe`）**
@@ -54,6 +55,7 @@ Next.js App Router の Route Handlers（`src/app/api/`）で実装。
 - `checkout.session.completed` 時、`prisma.$transaction` 内で (1) 既に `stripeCheckoutSessionId` があればスキップ (2) 各明細について `stock >= quantity` を満たすよう `product` を減算 (3) `orders` / `order_items` を作成。
 - 同一 `session.id` の再送・競合時は UNIQUE 制約（`P2002`）を握りつぶして 200 を返す（冪等）。
 - 減算できない場合は 500（決済済みだが在庫不足 — 運用で返金等が必要になり得る）。
+- ローカル開発等で Webhook が到達しない場合でも、`GET /api/checkout/verify` で同じ注文作成ロジックを呼び出し、売上未反映を回避する（冪等）。
 
 ### 管理者 API
 
@@ -78,6 +80,17 @@ Next.js App Router の Route Handlers（`src/app/api/`）で実装。
 ```
 
 値は各 Prisma enum（`OrderStatus`, `OrderPackageCondition`, `OrderAccountingStatus`, `OrderReturnStatus`）に一致する必要がある。
+
+### POST /api/orders/[id]/return（例）
+
+```json
+// Request（開封状態は任意）
+{ "packageCondition": "UNOPENED" }
+```
+
+- 注文所有者のみ申請可能
+- 注文ステータスが `PAID` / `SHIPPED` / `DELIVERED` の場合のみ受け付け
+- 既に `returnStatus !== NONE` の注文は再申請不可
 
 ## リクエスト/レスポンス例
 

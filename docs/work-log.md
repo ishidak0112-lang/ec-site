@@ -6,6 +6,17 @@
 
 ## 2026-04-15
 
+### 決済反映の補強（Webhook未達対策）
+- 調査で、決済後に `/api/webhooks/stripe` の受信ログが出ず、売上（orders）が未作成のケースを確認。
+- `src/lib/checkoutOrder.ts` に「Checkout Session から注文作成」の共通処理を切り出し、Webhookと`/api/checkout/verify`の両方から利用するよう変更。
+- `GET /api/checkout/verify` で `payment_status=paid` かつ未作成時に注文作成を試行するフォールバックを追加（冪等）。
+- `CheckoutPage` の `router.push('/cart')` を render 中実行から `useEffect` へ移し、購入直後の runtime warning を解消。
+
+### 返品申請フロー（ユーザー→管理）
+- `POST /api/orders/[id]/return` を追加。ユーザー本人のみ返品申請でき、`returnStatus` を `REQUESTED` に更新。
+- マイページ注文履歴に「返品申請する」ボタンを追加。対象注文（`PAID` / `SHIPPED` / `DELIVERED` かつ未申請）のみ表示。
+- 申請時に開封状態（任意）を送信可能。管理画面 `/admin/orders` の返品ステータス運用と連携。
+
 ### 返品・注文ステータス
 - `orders` に `packageCondition`（開封）・`accountingStatus`（会計）・`returnStatus`（返品〜返金）を追加。返金額はアプリでは算定せず、法令順守を `/legal/returns` に記載。
 - 管理画面 `/admin/orders` で各ステータスを更新可能。`PUT /api/admin/orders/[id]` が上記フィールドに対応。

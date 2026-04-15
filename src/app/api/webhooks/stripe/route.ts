@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
+import { createOrderFromCheckoutSession } from '@/lib/checkoutOrder'
 import { Prisma } from '@prisma/client'
 import Stripe from 'stripe'
 
@@ -31,70 +32,7 @@ export async function POST(req: NextRequest) {
 
     try {
       await prisma.$transaction(async tx => {
-        const existing = await tx.order.findUnique({
-          where: { stripeCheckoutSessionId: sessionId },
-        })
-        if (existing) {
-          return
-        }
-
-        const metadata = session.metadata
-        if (!metadata?.userId) {
-          throw new Error('MISSING_METADATA')
-        }
-
-        const items: {
-          productId: string
-          name: string
-          price: number
-          quantity: number
-        }[] = JSON.parse(metadata.itemsJson ?? '[]')
-
-        for (const item of items) {
-          const result = await tx.product.updateMany({
-            where: {
-              id: item.productId,
-              stock: { gte: item.quantity },
-            },
-            data: {
-              stock: { decrement: item.quantity },
-            },
-          })
-          if (result.count !== 1) {
-            throw new Error('INSUFFICIENT_STOCK')
-          }
-        }
-
-        const totalAmount = session.amount_total ?? 0
-
-        const paymentIntentId =
-          typeof session.payment_intent === 'string'
-            ? session.payment_intent
-            : session.payment_intent?.id ?? null
-
-        await tx.order.create({
-          data: {
-            userId: metadata.userId,
-            totalAmount,
-            status: 'PAID',
-            paymentMethod: 'credit',
-            stripePaymentId: paymentIntentId,
-            stripeCheckoutSessionId: sessionId,
-            shippingName: metadata.shippingName ?? '',
-            shippingEmail: metadata.shippingEmail ?? '',
-            shippingPhone: metadata.shippingPhone ?? '',
-            shippingZip: metadata.shippingZip ?? '',
-            shippingCity: metadata.shippingCity ?? '',
-            shippingAddress: metadata.shippingAddress ?? '',
-            items: {
-              create: items.map(item => ({
-                productId: item.productId,
-                quantity: item.quantity,
-                unitPrice: item.price,
-              })),
-            },
-          },
-        })
+        await createOrderFromCheckoutSession(tx, session)
       })
 
       console.log(`[Webhook] Order processed for session: ${sessionId}`)

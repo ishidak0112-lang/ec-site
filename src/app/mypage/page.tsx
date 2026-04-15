@@ -22,6 +22,9 @@ export default function MyPage() {
   const [name, setName] = useState('')
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [returnSubmittingId, setReturnSubmittingId] = useState<string | null>(null)
+  const [returnMessageByOrderId, setReturnMessageByOrderId] = useState<Record<string, string>>({})
+  const [packageConditionByOrderId, setPackageConditionByOrderId] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -54,6 +57,39 @@ export default function MyPage() {
       setProfileMessage({ type: 'error', text: '保存に失敗しました' })
     } finally {
       setProfileSaving(false)
+    }
+  }
+
+  const canRequestReturn = (order: OrderDetail) =>
+    ['PAID', 'SHIPPED', 'DELIVERED'].includes(order.status) &&
+    (order.returnStatus ?? 'NONE') === 'NONE'
+
+  const handleReturnRequest = async (order: OrderDetail) => {
+    setReturnSubmittingId(order.id)
+    setReturnMessageByOrderId(prev => ({ ...prev, [order.id]: '' }))
+
+    try {
+      const packageCondition = packageConditionByOrderId[order.id]
+      const res = await fetch(`/api/orders/${order.id}/return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          packageCondition: packageCondition && packageCondition !== 'UNCONFIRMED' ? packageCondition : undefined,
+        }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error ?? '返品申請に失敗しました')
+      }
+
+      setOrders(prev => prev.map(o => (o.id === order.id ? data : o)))
+      setReturnMessageByOrderId(prev => ({ ...prev, [order.id]: '返品申請を受け付けました。確認後にステータスを更新します。' }))
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '返品申請に失敗しました'
+      setReturnMessageByOrderId(prev => ({ ...prev, [order.id]: message }))
+    } finally {
+      setReturnSubmittingId(null)
     }
   }
 
@@ -152,6 +188,37 @@ export default function MyPage() {
                           </a>
                           をご確認ください。
                         </p>
+                        <div className="pt-2">
+                          {canRequestReturn(order) ? (
+                            <div className="flex flex-wrap items-center gap-2">
+                              <select
+                                value={packageConditionByOrderId[order.id] ?? 'UNCONFIRMED'}
+                                onChange={(e) =>
+                                  setPackageConditionByOrderId(prev => ({ ...prev, [order.id]: e.target.value }))
+                                }
+                                className="text-xs px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+                              >
+                                <option value="UNCONFIRMED">開封状態を選択（任意）</option>
+                                <option value="UNOPENED">開封前</option>
+                                <option value="OPENED">開封済み</option>
+                              </select>
+                              <button
+                                onClick={() => handleReturnRequest(order)}
+                                disabled={returnSubmittingId === order.id}
+                                className="text-xs px-3 py-1 bg-black text-white hover:bg-gray-800 disabled:opacity-50"
+                              >
+                                {returnSubmittingId === order.id ? '申請中...' : '返品申請する'}
+                              </button>
+                            </div>
+                          ) : (
+                            <p className="text-xs text-gray-500">
+                              返品申請が可能な注文のみボタンを表示します。
+                            </p>
+                          )}
+                          {returnMessageByOrderId[order.id] && (
+                            <p className="text-xs text-gray-600 mt-2">{returnMessageByOrderId[order.id]}</p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

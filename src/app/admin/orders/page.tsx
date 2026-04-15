@@ -92,10 +92,10 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-      <h1 className="text-3xl tracking-tight mb-8">注文管理</h1>
+      <h1 className="text-2xl sm:text-3xl tracking-tight mb-6 sm:mb-8">注文管理</h1>
 
-      <div className="bg-white border border-gray-200 p-6 mb-6">
-        <div className="flex gap-2">
+      <div className="bg-white border border-gray-200 p-4 sm:p-6 mb-6">
+        <div className="flex flex-col sm:flex-row gap-2">
           <div className="relative flex-1">
             <input
               type="text"
@@ -107,12 +107,13 @@ export default function AdminOrdersPage() {
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           </div>
-          <button
-            onClick={handleSearch}
-            className="px-4 py-2 bg-black text-white text-sm hover:bg-gray-800 transition-colors"
-          >
-            検索
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleSearch}
+              className="px-4 py-2 bg-black text-white text-sm hover:bg-gray-800 transition-colors"
+            >
+              検索
+            </button>
           {searchTerm && (
             <button
               onClick={() => { setSearchTerm(''); fetchOrders(); }}
@@ -121,6 +122,7 @@ export default function AdminOrdersPage() {
               リセット
             </button>
           )}
+          </div>
         </div>
       </div>
 
@@ -145,18 +147,18 @@ export default function AdminOrdersPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="bg-white border border-gray-200"
+            className="bg-white border border-gray-200 overflow-hidden"
           >
             <div
-              className="p-6 cursor-pointer hover:bg-gray-50"
+              className="p-4 sm:p-6 cursor-pointer hover:bg-gray-50"
               onClick={() =>
                 setExpandedOrder(expandedOrder === order.id ? null : order.id)
               }
             >
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-2">
-                    <p className="font-medium">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                    <p className="font-medium text-sm sm:text-base break-all">
                       注文番号: #{order.id.slice(-8).toUpperCase()}
                     </p>
                     <span
@@ -172,7 +174,7 @@ export default function AdminOrdersPage() {
                       </span>
                     )}
                   </div>
-                  <div className="text-sm text-gray-600 space-y-1">
+                  <div className="text-xs sm:text-sm text-gray-600 space-y-1">
                     <p>
                       注文日:{' '}
                       {new Date(order.createdAt).toLocaleDateString('ja-JP', {
@@ -187,8 +189,8 @@ export default function AdminOrdersPage() {
                     <p>商品数: {order.items.length}点</p>
                   </div>
                 </div>
-                <div className="text-right mr-6">
-                  <p className="text-2xl mb-1">
+                <div className="sm:text-right sm:mr-4">
+                  <p className="text-xl sm:text-2xl mb-1">
                     ¥{order.totalAmount.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-600">合計金額</p>
@@ -202,7 +204,7 @@ export default function AdminOrdersPage() {
             </div>
 
             {expandedOrder === order.id && (
-              <div className="border-t border-gray-200 p-6 bg-gray-50">
+              <div className="border-t border-gray-200 p-4 sm:p-6 bg-gray-50">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   <div>
                     <h3 className="font-medium mb-4">注文商品</h3>
@@ -210,9 +212,9 @@ export default function AdminOrdersPage() {
                       {order.items.map(item => (
                         <div
                           key={item.id}
-                          className="flex justify-between text-sm"
+                          className="flex justify-between gap-4 text-sm"
                         >
-                          <span>
+                          <span className="min-w-0 break-words">
                             {item.product.name} × {item.quantity}
                           </span>
                           <span>
