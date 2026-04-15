@@ -12,6 +12,10 @@
 - **`/admin/users`** は **`/admin/customers` へリダイレクト**（旧ブックマーク互換）。ナビ表記は「顧客」。
 - 従業員（ADMIN）専用の管理 UI は未作成（`feature-list` に A-STAFF-01 として未着手を明記）。
 
+### ログアウト遅延の挙動確認
+- `signOut` 時は `prepareLogoutClearCart()` で sessionStorage フラグ設定後、NextAuth の signout API でセッション Cookie を破棄し、`callbackUrl` にフルリロード遷移する。
+- 体感が遅い主因はログアウト API そのものより「遷移先ページの再ロード + `/api/auth/session` 再確認」。dev（Turbopack）では本番より顕著。
+
 ### バックログ登録（Prisma／DB 同期）
 - `docs/design-backlog.md` に **B-OPS-01**（スキーマと DB の同期を手運用に頼らない・デプロイ/CI 方針）を **高優先・未着手** で追加。
 
@@ -117,4 +121,4 @@
 
 ---
 
-最終更新: 2026-04-15（顧客管理 `/admin/customers`）
+最終更新: 2026-04-15（ログアウト挙動の確認を追記）
