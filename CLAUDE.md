@@ -56,6 +56,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 | APIエンドポイントの追加・変更・削除 | `docs/api-design.md` |
 | 画面レイアウトの大幅変更 | `docs/wireframe.md` |
 | 作業履歴・マイルストーンの記録 | `docs/work-log.md` |
+| 設計課題・拡張バックログの追加・消化 | `docs/design-backlog.md` |
 
 - ドキュメントの `最終更新:` 日付も合わせて更新すること
 - 実装だけ変えてドキュメントを放置しない
