@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
+import { resolveSiteUrl } from '@/lib/siteUrl'
 
 interface CartItem {
   productId: string
@@ -75,12 +76,13 @@ export async function POST(req: NextRequest) {
   }))
 
   try {
+    const siteUrl = resolveSiteUrl(req)
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${process.env.NEXTAUTH_URL}/order-complete?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/checkout`,
+      success_url: `${siteUrl}/order-complete?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${siteUrl}/checkout`,
       metadata: {
         userId: session.user.id,
         shippingName: shipping.name,

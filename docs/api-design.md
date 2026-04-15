@@ -1,6 +1,6 @@
 # API設計書
 
-最終更新: 2026-04-15（`/api/checkout/verify` のエラー応答・シード画像URL差し替え）
+最終更新: 2026-04-15（Checkout の success/cancel URL をリクエスト Origin で解決）
 
 ## 概要
 
@@ -115,10 +115,10 @@ Next.js App Router の Route Handlers（`src/app/api/`）で実装。
 ```
 
 ### POST /api/checkout/session
-```json
-// Request
-{ "orderId": "clyyy" }
 
+- `success_url` / `cancel_url` は `resolveSiteUrl(req)` で組み立てる。開発でポートが `3000` 以外（例: `3001`）のとき、`NEXTAUTH_URL` だけだと Stripe 決済後の戻り先が存在せずタブが読み込み続けるため、**リクエストの `Origin` を優先**する。本番は `NEXTAUTH_URL`（または Vercel の URL）を使用。
+
+```json
 // Response 200
 { "url": "https://checkout.stripe.com/..." }
 ```

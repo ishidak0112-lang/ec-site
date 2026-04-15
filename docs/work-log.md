@@ -6,6 +6,10 @@
 
 ## 2026-04-15
 
+### Stripe 決済後に EC に戻れない（タブが読み込み続ける）
+- 原因: `success_url` が `NEXTAUTH_URL`（多くは `http://localhost:3000`）固定で、dev が `3001` など別ポートのとき、Stripe のリダイレクト先にサーバーがなく無限ローディングになる。
+- 対応: `src/lib/siteUrl.ts` の `resolveSiteUrl(req)` を追加し、`POST /api/checkout/session` の `success_url` / `cancel_url` に使用。開発時はリクエストの **`Origin` を優先**。
+
 ### 障害対応（開発環境・DB反映）
 - `P2022: The column orders.packageCondition does not exist` を確認。原因はアプリ側スキーマ更新に対して DB 側カラム未反映だったこと。
 - `.env.local` に `DIRECT_URL` は存在するが、シェル環境変数にロードされていないケースを確認。`echo "$DIRECT_URL"` で空になる事象を切り分け。
@@ -89,4 +93,4 @@
 
 ---
 
-最終更新: 2026-04-15（verify エラー応答・シード画像URL・完了画面）
+最終更新: 2026-04-15（Stripe 戻り先 URL・verify・シード画像）

@@ -31,14 +31,14 @@ docs/              # 設計ドキュメント
 - `npx prisma db push` — スキーマをDBに反映
 - `DATABASE_URL="$DIRECT_URL" npx prisma db push --accept-data-loss` — Supabase direct接続で反映（poolerで詰まる場合）
 - `npx prisma generate` — Prismaクライアント生成
-- `stripe listen --forward-to localhost:3000/api/webhooks/stripe` — ローカルWebhook検証（表示された `whsec_...` を `STRIPE_WEBHOOK_SECRET` に設定）
+- `stripe listen --forward-to localhost:3000/api/webhooks/stripe` — ローカルWebhook検証（表示された `whsec_...` を `STRIPE_WEBHOOK_SECRET` に設定）。**dev サーバーのポート**（例: `3001`）に合わせて URL を変えること。
 
 ## 環境変数（.env.local）
 ```
 DATABASE_URL=
 DIRECT_URL=
 NEXTAUTH_SECRET=
-NEXTAUTH_URL=
+NEXTAUTH_URL=        # 本番・Preview の絶対 URL。開発でポートがずれても Checkout の戻り先は API が Origin を優先する。
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
