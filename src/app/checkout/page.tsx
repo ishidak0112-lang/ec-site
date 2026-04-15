@@ -3,9 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import { useCart } from '@/lib/cartStore';
 import Image from 'next/image';
+
 export default function CheckoutPage() {
+  const { data: session, status: sessionStatus } = useSession();
   const { items, total, clearCart } = useCart();
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -20,10 +23,28 @@ export default function CheckoutPage() {
   const shipping = subtotal >= 5000 ? 0 : 500;
 
   useEffect(() => {
+    if (sessionStatus === 'unauthenticated') {
+      router.push('/login?callbackUrl=/checkout');
+    }
+  }, [sessionStatus, router]);
+
+  useEffect(() => {
     if (items.length === 0) {
       router.push('/cart');
     }
   }, [items.length, router]);
+
+  if (sessionStatus === 'loading') {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-24 text-center text-gray-600">
+        読み込み中...
+      </div>
+    );
+  }
+
+  if (sessionStatus === 'unauthenticated' || !session?.user?.id) {
+    return null;
+  }
 
   if (items.length === 0) {
     return null;
@@ -38,6 +59,7 @@ export default function CheckoutPage() {
       try {
         const res = await fetch('/api/checkout/session', {
           method: 'POST',
+          credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             items: items.map((item) => ({
@@ -62,6 +84,10 @@ export default function CheckoutPage() {
         if (!res.ok) {
           const text = await res.text();
           const data = text ? JSON.parse(text) : {};
+          if (res.status === 401) {
+            router.push('/login?callbackUrl=/checkout');
+            throw new Error('ログインが必要です。ログイン画面へ移動します。');
+          }
           throw new Error(data.error ?? '決済セッションの作成に失敗しました');
         }
 

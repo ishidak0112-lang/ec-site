@@ -21,6 +21,9 @@
 - Stripe セッション取得失敗は **502**。`/order-complete` で API 失敗時に案内文を表示。
 - `CheckoutPage` の `router.push('/cart')` を render 中実行から `useEffect` へ移し、購入直後の runtime warning を解消。
 
+### チェックアウト 401（未ログイン）
+- `POST /api/checkout/session` は会員セッション必須のため、未ログインだと **401**。購入手続き画面で未認証の場合は `/login?callbackUrl=/checkout` へ誘導し、API が 401 を返した場合も同様にリダイレクトする。
+
 ### 商品画像（Unsplash 404）
 - ターミナルに `upstream image response failed ... 404` が出ていた原因は、シードの「ワイヤレス充電器」が参照していた Unsplash 写真が削除済みだったこと。
 - `prisma/seed.ts` の `imageUrl` を HTTP 200 になる別写真に差し替え。既存 DB は `npx prisma db seed`（または該当商品の `imageUrl` 更新）で反映。
