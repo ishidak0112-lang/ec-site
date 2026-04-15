@@ -1,6 +1,6 @@
 # API設計書
 
-最終更新: 2026-04-15（管理者注文一覧の日付クエリ）
+最終更新: 2026-04-15（プロフィール GET・性別/都道府県）
 
 ## 概要
 
@@ -25,7 +25,8 @@ Next.js App Router の Route Handlers（`src/app/api/`）で実装。
 
 | メソッド | パス | 説明 | 認証 |
 |---------|------|------|------|
-| PUT | /api/user/profile | プロフィール更新（名前） ✅ 実装済み | 必要（ADMIN は 403） |
+| GET | /api/user/profile | プロフィール取得（名前・メール・性別・都道府県） ✅ 実装済み | 必要（ADMIN は 403） |
+| PUT | /api/user/profile | プロフィール更新（`name` 必須、`gender`・`prefecture` 任意） ✅ 実装済み | 必要（ADMIN は 403） |
 
 ### 商品
 

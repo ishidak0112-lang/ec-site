@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { stripe } from '@/lib/stripe'
 import { resolveSiteUrl } from '@/lib/siteUrl'
+import { JAPAN_PREFECTURES } from '@/lib/japanPrefectures'
 
 interface CartItem {
   productId: string
@@ -17,6 +18,8 @@ interface ShippingInfo {
   email: string
   phone: string
   zipCode: string
+  /** 都道府県（47都道府県のいずれか） */
+  prefecture: string
   city: string
   address: string
 }
@@ -63,6 +66,15 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  if (
+    !shipping.prefecture ||
+    !JAPAN_PREFECTURES.includes(
+      shipping.prefecture as (typeof JAPAN_PREFECTURES)[number]
+    )
+  ) {
+    return NextResponse.json({ error: '配送先の都道府県を選択してください' }, { status: 400 })
+  }
+
   const lineItems = items.map((item) => ({
     price_data: {
       currency: 'jpy',
@@ -89,6 +101,7 @@ export async function POST(req: NextRequest) {
         shippingEmail: shipping.email,
         shippingPhone: shipping.phone,
         shippingZip: shipping.zipCode,
+        shippingPrefecture: shipping.prefecture,
         shippingCity: shipping.city,
         shippingAddress: shipping.address,
         itemsJson: JSON.stringify(

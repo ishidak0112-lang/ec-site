@@ -45,10 +45,16 @@ export async function GET(request: Request) {
           OR: [
             { shippingName: { contains: search, mode: 'insensitive' } },
             { shippingEmail: { contains: search, mode: 'insensitive' } },
+            { shippingPrefecture: { contains: search } },
             { id: { contains: search } },
             {
               user: {
                 email: { contains: search, mode: 'insensitive' },
+              },
+            },
+            {
+              user: {
+                prefecture: { contains: search },
               },
             },
           ],
@@ -72,7 +78,7 @@ export async function GET(request: Request) {
             product: { select: { name: true } },
           },
         },
-        user: { select: { name: true, email: true } },
+        user: { select: { name: true, email: true, gender: true, prefecture: true } },
       },
       orderBy: { createdAt: 'desc' },
     })

@@ -65,6 +65,7 @@ export async function createOrderFromCheckoutSession(
       shippingEmail: metadata.shippingEmail ?? '',
       shippingPhone: metadata.shippingPhone ?? '',
       shippingZip: metadata.shippingZip ?? '',
+      shippingPrefecture: metadata.shippingPrefecture ?? '',
       shippingCity: metadata.shippingCity ?? '',
       shippingAddress: metadata.shippingAddress ?? '',
       items: {

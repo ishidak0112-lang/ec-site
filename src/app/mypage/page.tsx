@@ -12,6 +12,9 @@ import {
   returnStatusLabel,
 } from '@/lib/orderLabels'
 import { prepareLogoutClearCart } from '@/lib/cartStore'
+import { JAPAN_PREFECTURES } from '@/lib/japanPrefectures'
+import { Gender } from '@prisma/client'
+import { genderLabel } from '@/lib/profileLabels'
 import type { OrderDetail } from '@/types'
 
 export default function MyPage() {
@@ -21,11 +24,25 @@ export default function MyPage() {
   const [orders, setOrders] = useState<OrderDetail[]>([])
   const [ordersLoading, setOrdersLoading] = useState(false)
   const [name, setName] = useState('')
+  const [gender, setGender] = useState<string>('UNKNOWN')
+  const [prefecture, setPrefecture] = useState('')
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [returnSubmittingId, setReturnSubmittingId] = useState<string | null>(null)
   const [returnMessageByOrderId, setReturnMessageByOrderId] = useState<Record<string, string>>({})
   const [packageConditionByOrderId, setPackageConditionByOrderId] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    if (status !== 'authenticated' || tab !== 'profile') return
+    fetch('/api/user/profile')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.name != null) setName(data.name)
+        if (data?.gender) setGender(data.gender)
+        setPrefecture(data?.prefecture ?? '')
+      })
+      .catch(() => {})
+  }, [status, tab])
 
   useEffect(() => {
     if (status !== 'authenticated') return
@@ -51,7 +68,11 @@ export default function MyPage() {
       const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({
+          name,
+          gender,
+          prefecture: prefecture || null,
+        }),
       })
       if (res.ok) {
         await update()
@@ -185,7 +206,9 @@ export default function MyPage() {
                         </div>
                         <div className="flex justify-between items-center">
                           <p className="text-sm text-gray-600">
-                            配送先: {order.shippingZip} {order.shippingCity}
+                            配送先: {order.shippingZip}{' '}
+                            {order.shippingPrefecture ? `${order.shippingPrefecture} ` : ''}
+                            {order.shippingCity}
                             {order.shippingAddress}
                           </p>
                           <p className="text-lg">合計: ¥{order.totalAmount.toLocaleString()}</p>
@@ -249,6 +272,35 @@ export default function MyPage() {
                       onChange={(e) => setName(e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-2">性別</label>
+                    <select
+                      value={gender}
+                      onChange={(e) => setGender(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-black"
+                    >
+                      {Object.values(Gender).map((k) => (
+                        <option key={k} value={k}>
+                          {genderLabel[k]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-2">都道府県（任意）</label>
+                    <select
+                      value={prefecture}
+                      onChange={(e) => setPrefecture(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-black"
+                    >
+                      <option value="">未設定</option>
+                      {JAPAN_PREFECTURES.map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm mb-2">メールアドレス</label>

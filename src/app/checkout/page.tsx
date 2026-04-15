@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { useCart } from '@/lib/cartStore';
+import { JAPAN_PREFECTURES } from '@/lib/japanPrefectures';
 import Image from 'next/image';
 
 export default function CheckoutPage() {
@@ -13,7 +14,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '',
-    zipCode: '', city: '', address: '',
+    zipCode: '', prefecture: '', city: '', address: '',
     paymentMethod: 'credit',
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -74,6 +75,7 @@ export default function CheckoutPage() {
               email: formData.email,
               phone: formData.phone,
               zipCode: formData.zipCode,
+              prefecture: formData.prefecture,
               city: formData.city,
               address: formData.address,
             },
@@ -135,17 +137,59 @@ export default function CheckoutPage() {
             <section className="bg-white border border-gray-200 p-6">
               <h2 className="text-xl mb-6">配送先情報</h2>
               <div className="space-y-4">
-                {[
-                  { label: '郵便番号', name: 'zipCode', placeholder: '123-4567' },
-                  { label: '都道府県・市区町村', name: 'city', placeholder: '東京都渋谷区' },
-                  { label: '番地・建物名', name: 'address', placeholder: '神宮前1-2-3 〇〇マンション101' },
-                ].map(f => (
-                  <div key={f.name}>
-                    <label className="block text-sm mb-2">{f.label} *</label>
-                    <input type="text" name={f.name} required placeholder={f.placeholder} value={(formData as Record<string, string>)[f.name]} onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black" />
-                  </div>
-                ))}
+                <div>
+                  <label className="block text-sm mb-2">郵便番号 *</label>
+                  <input
+                    type="text"
+                    name="zipCode"
+                    required
+                    placeholder="123-4567"
+                    value={formData.zipCode}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm mb-2">都道府県 *</label>
+                  <select
+                    name="prefecture"
+                    required
+                    value={formData.prefecture}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-black"
+                  >
+                    <option value="">選択してください</option>
+                    {JAPAN_PREFECTURES.map(p => (
+                      <option key={p} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm mb-2">市区町村 *</label>
+                  <input
+                    type="text"
+                    name="city"
+                    required
+                    placeholder="渋谷区"
+                    value={formData.city}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm mb-2">番地・建物名 *</label>
+                  <input
+                    type="text"
+                    name="address"
+                    required
+                    placeholder="神宮前1-2-3 〇〇マンション101"
+                    value={formData.address}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                </div>
               </div>
             </section>
 

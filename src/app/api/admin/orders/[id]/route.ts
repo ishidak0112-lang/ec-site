@@ -84,7 +84,7 @@ export async function PUT(
             product: { select: { name: true } },
           },
         },
-        user: { select: { name: true, email: true } },
+        user: { select: { name: true, email: true, gender: true, prefecture: true } },
       },
     })
 

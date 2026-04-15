@@ -1,6 +1,6 @@
 # DB設計書
 
-最終更新: 2026-04-15（返品・開封・会計ステータス）
+最終更新: 2026-04-15（ユーザー性別・都道府県・注文の配送先都道府県）
 
 ## 概要
 
@@ -28,6 +28,8 @@ users ─────────────── orders ──── order_it
 | emailVerified | DateTime? | | メール認証日時 |
 | password | String? | | ハッシュ化パスワード |
 | role | Role | DEFAULT USER | 権限（USER/ADMIN） |
+| gender | Gender | DEFAULT UNKNOWN | 性別（プロフィール・管理一覧表示） |
+| prefecture | String? | | プロフィールの都道府県（任意） |
 | createdAt | DateTime | DEFAULT now() | 作成日時 |
 | updatedAt | DateTime | | 更新日時 |
 
@@ -73,7 +75,8 @@ users ─────────────── orders ──── order_it
 | shippingEmail | String | | 配送先メールアドレス |
 | shippingPhone | String | | 配送先電話番号 |
 | shippingZip | String | | 郵便番号 |
-| shippingCity | String | | 都道府県・市区町村 |
+| shippingPrefecture | String | DEFAULT '' | 配送先都道府県（チェックアウトで選択） |
+| shippingCity | String | | 市区町村 |
 | shippingAddress | String | | 番地・建物名 |
 | createdAt | DateTime | | 注文日時 |
 | updatedAt | DateTime | | 更新日時 |
@@ -95,6 +98,14 @@ users ─────────────── orders ──── order_it
 |----|------|
 | USER | 一般ユーザー（デフォルト） |
 | ADMIN | 管理者 |
+
+### Gender
+| 値 | 説明 |
+|----|------|
+| UNKNOWN | 未設定（デフォルト） |
+| MALE | 男性 |
+| FEMALE | 女性 |
+| OTHER | その他 |
 
 ### OrderStatus
 | 値 | 説明 |

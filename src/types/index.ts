@@ -39,6 +39,7 @@ export interface OrderDetail {
   createdAt: string
   shippingName: string
   shippingZip: string
+  shippingPrefecture?: string
   shippingCity: string
   shippingAddress: string
   items: OrderItemDetail[]

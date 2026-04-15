@@ -10,6 +10,8 @@ import {
   accountingStatusLabel,
   returnStatusLabel,
 } from '@/lib/orderLabels';
+import { genderLabel } from '@/lib/profileLabels';
+import type { Gender } from '@prisma/client';
 
 type OrderItem = {
   id: string;
@@ -27,13 +29,31 @@ type Order = {
   totalAmount: number;
   shippingName: string;
   shippingZip: string;
+  shippingPrefecture?: string;
   shippingCity?: string;
   shippingAddress: string;
   shippingPhone: string;
   createdAt: string;
   items: OrderItem[];
-  user: { name: string | null; email: string | null } | null;
+  user: {
+    name: string | null;
+    email: string | null;
+    gender?: Gender;
+    prefecture?: string | null;
+  } | null;
 };
+
+function formatGender(g: Gender | undefined): string {
+  if (!g) return '—';
+  return genderLabel[g] ?? g;
+}
+
+function formatPrefecture(order: Order): string {
+  const p = order.shippingPrefecture?.trim();
+  if (p) return p;
+  if (order.user?.prefecture) return order.user.prefecture;
+  return '—';
+}
 
 async function fetchOrdersWithParams(params: URLSearchParams, setLoading: (v: boolean) => void, setError: (v: string | null) => void, setOrders: (v: Order[]) => void) {
   setLoading(true);
@@ -214,18 +234,24 @@ export default function AdminOrdersPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] sm:text-xs text-gray-600 mt-0.5 truncate">
-                    {new Date(order.createdAt).toLocaleString('ja-JP', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                    <span className="text-gray-400 mx-1">·</span>
-                    {order.shippingName}
-                    <span className="text-gray-400 mx-1">·</span>
-                    {order.items.length}点
+                  <p className="text-[11px] sm:text-xs text-gray-600 mt-0.5 leading-snug">
+                    <span className="break-all">
+                      {new Date(order.createdAt).toLocaleString('ja-JP', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                      <span className="text-gray-400 mx-1">·</span>
+                      氏名: {order.shippingName}
+                      <span className="text-gray-400 mx-1">·</span>
+                      性別: {formatGender(order.user?.gender)}
+                      <span className="text-gray-400 mx-1">·</span>
+                      都道府県: {formatPrefecture(order)}
+                      <span className="text-gray-400 mx-1">·</span>
+                      {order.items.length}点
+                    </span>
                   </p>
                 </div>
                 <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 shrink-0">
@@ -268,9 +294,12 @@ export default function AdminOrdersPage() {
                     <h3 className="font-medium mb-4">配送先情報</h3>
                     <div className="text-sm space-y-2 text-gray-700">
                       <p>氏名: {order.shippingName}</p>
+                      <p>性別（アカウント）: {formatGender(order.user?.gender)}</p>
                       <p>郵便番号: {order.shippingZip}</p>
+                      <p>都道府県（配送）: {formatPrefecture(order)}</p>
                       <p>
-                        住所: {order.shippingCity ? `${order.shippingCity} ` : ''}
+                        住所:{' '}
+                        {order.shippingCity ? `${order.shippingCity} ` : ''}
                         {order.shippingAddress}
                       </p>
                       <p>電話番号: {order.shippingPhone}</p>
