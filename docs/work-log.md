@@ -10,6 +10,7 @@
 - 応答ヘッダ `x-vercel-error: FUNCTION_RUNTIME_DEPRECATED` — デプロイに紐づくサーバーレスランタイムがプラットフォームで非推奨扱いになっていた。
 - `package.json` に **`engines.node`: `20.x`** を追加し、再デプロイで最新サポートランタイムを使うよう明示。
 - Next.js 16 の **`proxy.ts`（Node 上の Proxy）** が同エラーを誘発しうるため、**Edge の `middleware.ts`** に戻してデプロイ（ビルドは「middleware 非推奨・proxy 推奨」の警告が出るが、本番応答優先）。
+- それでも `FUNCTION_RUNTIME_DEPRECATED` が続く場合は **Vercel ダッシュボード** → 該当プロジェクト → **Settings → Node.js Version** を **20**（または利用可能な最新）にし、**Deployments から Redeploy** する（プロジェクト設定が `package.json` の `engines` より優先されることがある）。
 
 ### B-DOC-01（公開商品 API と実装の整合）
 - 方針 **A** を採用: ストアの商品一覧・詳細は **Server Component + Prisma**（`ProductGrid`、`products/[id]/page.tsx`）であり、公開用 `GET /api/products` は**存在しない**。
