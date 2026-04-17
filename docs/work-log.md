@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-04-18
+
+### B-DOC-01（公開商品 API と実装の整合）
+- 方針 **A** を採用: ストアの商品一覧・詳細は **Server Component + Prisma**（`ProductGrid`、`products/[id]/page.tsx`）であり、公開用 `GET /api/products` は**存在しない**。
+- `docs/api-design.md` に上記を「概要」直下で明記し、エンドポイント一覧から未実装の GET 行を削除。`design-backlog.md` の B-DOC-01 を完了に更新。
+
+---
+
 ## 2026-04-15
 
 ### 管理画面：顧客と管理者の分離

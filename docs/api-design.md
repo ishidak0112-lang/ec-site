@@ -1,10 +1,21 @@
 # API設計書
 
-最終更新: 2026-04-15（管理者 API: 顧客 `/api/admin/customers`）
+最終更新: 2026-04-18（B-DOC-01: 公開ストアの商品取得は RSC + Prisma に統一）
 
 ## 概要
 
 Next.js App Router の Route Handlers（`src/app/api/`）で実装。
+
+### 公開ストアの商品データ（Route Handler ではない）
+
+会員向けの**商品一覧・商品詳細**は、JSON を返す `GET /api/products` 等は**用意していない**。`published: true` の商品は次の Server Component から Prisma で直接取得する。
+
+| 画面 | 実装 |
+|------|------|
+| トップ（一覧・ページネーション・カテゴリ） | `src/components/product/ProductGrid.tsx`（`/`） |
+| 商品詳細 | `src/app/products/[id]/page.tsx` |
+
+外部クライアント向けの公開 REST API が必要になった場合は、この方針を見直し Route Handler を追加する。
 
 ## 認証
 
@@ -27,13 +38,6 @@ Next.js App Router の Route Handlers（`src/app/api/`）で実装。
 |---------|------|------|------|
 | GET | /api/user/profile | プロフィール取得（名前・メール・性別・都道府県） ✅ 実装済み | 必要（ADMIN は 403） |
 | PUT | /api/user/profile | プロフィール更新（`name` 必須、`gender`・`prefecture` 任意） ✅ 実装済み | 必要（ADMIN は 403） |
-
-### 商品
-
-| メソッド | パス | 説明 | 認証 |
-|---------|------|------|------|
-| GET | /api/products | 商品一覧（公開商品のみ） | 不要 |
-| GET | /api/products/[id] | 商品詳細 | 不要 |
 
 ### 注文
 
