@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
 // 売上計上対象ステータス（キャンセル除外）
-const SALES_STATUSES = ['PAID', 'SHIPPED', 'DELIVERED'] as const
+const SALES_STATUSES = ['PAID', 'SHIPPED', 'DELIVERED'] as ['PAID', 'SHIPPED', 'DELIVERED']
 
 // GET /api/admin/sales?year=2026
 export async function GET(request: Request) {

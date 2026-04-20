@@ -36,9 +36,9 @@ export async function GET(request: Request) {
 
   // orderCount ソートは Prisma の orderBy では直接使えないため件数取得後にソート
   const orderBy =
-    sortBy === 'name' ? { name: sortOrder } :
-    sortBy === 'email' ? { email: sortOrder } :
-    { createdAt: sortOrder }
+    sortBy === 'name' ? { name: sortOrder as 'asc' | 'desc' } :
+    sortBy === 'email' ? { email: sortOrder as 'asc' | 'desc' } :
+    { createdAt: sortOrder as 'asc' | 'desc' }
 
   const [total, users] = await Promise.all([
     prisma.user.count({ where }),
