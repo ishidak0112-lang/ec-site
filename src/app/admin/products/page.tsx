@@ -40,6 +40,8 @@ export default function AdminProductsPage() {
   const [formData, setFormData] = useState<FormData>(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterPublished, setFilterPublished] = useState<'all' | 'published' | 'unpublished'>('all');
 
   // 初回ロード
   useEffect(() => {
@@ -64,9 +66,13 @@ export default function AdminProductsPage() {
     }
   };
 
-  const filteredProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products.filter(p => {
+    if (!p.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (filterCategory && p.categoryId !== filterCategory) return false;
+    if (filterPublished === 'published' && !p.published) return false;
+    if (filterPublished === 'unpublished' && p.published) return false;
+    return true;
+  });
 
   const handleEdit = (product: Product) => {
     setEditingId(product.id);
@@ -162,16 +168,48 @@ export default function AdminProductsPage() {
       </div>
 
       <div className="bg-white border border-gray-200 p-6 mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="商品名で検索..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 pl-10 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-          />
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="商品名で検索..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 pl-10 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          </div>
+          <select
+            value={filterCategory}
+            onChange={e => setFilterCategory(e.target.value)}
+            className="px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black text-sm"
+          >
+            <option value="">すべてのカテゴリ</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
+          <select
+            value={filterPublished}
+            onChange={e => setFilterPublished(e.target.value as 'all' | 'published' | 'unpublished')}
+            className="px-4 py-2 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black text-sm"
+          >
+            <option value="all">公開・非公開 すべて</option>
+            <option value="published">公開のみ</option>
+            <option value="unpublished">非公開のみ</option>
+          </select>
         </div>
+        {(filterCategory || filterPublished !== 'all' || searchTerm) && (
+          <div className="mt-3 flex items-center gap-2 text-sm text-gray-500">
+            <span>{filteredProducts.length} 件表示</span>
+            <button
+              onClick={() => { setSearchTerm(''); setFilterCategory(''); setFilterPublished('all'); }}
+              className="text-blue-600 hover:underline"
+            >
+              フィルターをリセット
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bg-white border border-gray-200 overflow-hidden">
@@ -182,8 +220,8 @@ export default function AdminProductsPage() {
               <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-gray-600">カテゴリ</th>
               <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-gray-600">価格</th>
               <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-gray-600">在庫</th>
-              <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-gray-600">公開</th>
-              <th className="px-6 py-3 text-right text-xs uppercase tracking-wider text-gray-600">操作</th>
+              <th className="px-6 py-3 text-left text-xs uppercase tracking-wider text-gray-600 whitespace-nowrap w-px">公開</th>
+              <th className="px-6 py-3 text-right text-xs uppercase tracking-wider text-gray-600 whitespace-nowrap w-px">操作</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
@@ -215,12 +253,12 @@ export default function AdminProductsPage() {
                     {product.stock}
                   </span>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`text-xs px-2 py-1 ${product.published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
                     {product.published ? '公開' : '非公開'}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-right">
+                <td className="px-6 py-4 text-right whitespace-nowrap">
                   <button onClick={() => handleEdit(product)} className="text-gray-600 hover:text-black mr-4">
                     <Edit className="w-4 h-4" />
                   </button>
