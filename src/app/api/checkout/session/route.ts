@@ -129,9 +129,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: checkoutSession.url })
   } catch (err: any) {
-    console.error('Stripe session error:', err?.message, 'param:', err?.param, 'type:', err?.type)
+    console.error('Stripe session error:', err?.message, 'param:', err?.param)
     const message = err instanceof Error ? err.message : 'Stripe error'
     const param = err?.param ?? 'unknown'
-    return NextResponse.json({ error: `${message} | param=${param}` }, { status: 500 })
+    const keyHint = (process.env.STRIPE_SECRET_KEY ?? '').slice(0, 14) + '...'
+    return NextResponse.json({ error: `${message} | param=${param} | key=${keyHint}` }, { status: 500 })
   }
 }
