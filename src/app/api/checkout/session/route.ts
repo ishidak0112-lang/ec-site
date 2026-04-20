@@ -129,9 +129,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: checkoutSession.url })
   } catch (err) {
+    const siteUrlDebug = process.env.NEXTAUTH_URL ?? '(NEXTAUTH_URL未設定)'
     console.error('Stripe session error:', err instanceof Error ? err.message : err)
-    console.error('Stripe error detail:', JSON.stringify(err, Object.getOwnPropertyNames(err)))
+    console.error('NEXTAUTH_URL:', siteUrlDebug)
     const message = err instanceof Error ? err.message : 'Stripe error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    return NextResponse.json({ error: `${message} | siteUrl=${siteUrlDebug}` }, { status: 500 })
   }
 }
