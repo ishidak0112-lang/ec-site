@@ -10,6 +10,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin', label: '概要' },
     { href: '/admin/products', label: '商品' },
     { href: '/admin/orders', label: '注文' },
+    { href: '/admin/sales', label: '売上' },
     { href: '/admin/customers', label: '顧客' },
   ] as const;
 
